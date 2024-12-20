@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Text } from "react-native-paper";
+import { Text, IconButton } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -15,7 +15,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { register } = useAuth();
-  const { theme } = useTheme();
+  const { theme, isDarkTheme, toggleTheme } = useTheme();
 
   const handleRegister = async () => {
     try {
@@ -51,52 +51,78 @@ export default function Register() {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Text style={[styles.title, { color: theme.colors.text }]}>Cadastro</Text>
+      <View style={styles.themeButtonContainer}>
+        <IconButton
+          icon={isDarkTheme ? "white-balance-sunny" : "moon-waning-crescent"}
+          size={24}
+          onPress={toggleTheme}
+          iconColor={theme.colors.text}
+          style={styles.themeButton}
+        />
+      </View>
 
-      <Input
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        disabled={loading}
-      />
-
-      <Input
-        label="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        disabled={loading}
-      />
-
-      <Input
-        label="Confirmar Senha"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        disabled={loading}
-      />
-
-      {error ? (
-        <Text style={[styles.error, { color: theme.colors.error }]}>
-          {error}
+      <View style={styles.content}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>
+          Cadastro
         </Text>
-      ) : null}
 
-      <Button onPress={handleRegister} loading={loading} disabled={loading}>
-        Cadastrar
-      </Button>
+        <Input
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          disabled={loading}
+        />
 
-      <Button mode="text" onPress={() => router.back()} disabled={loading}>
-        Voltar para Login
-      </Button>
+        <Input
+          label="Senha"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          disabled={loading}
+        />
+
+        <Input
+          label="Confirmar Senha"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          disabled={loading}
+        />
+
+        {error ? (
+          <Text style={[styles.error, { color: theme.colors.error }]}>
+            {error}
+          </Text>
+        ) : null}
+
+        <Button onPress={handleRegister} loading={loading} disabled={loading}>
+          Cadastrar
+        </Button>
+
+        <Button mode="text" onPress={() => router.back()} disabled={loading}>
+          Voltar para Login
+        </Button>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  themeButtonContainer: {
+    position: "absolute",
+
+    right: 20,
+    zIndex: 1,
+  },
+  themeButton: {
+    margin: 0,
+  },
+  content: {
     flex: 1,
     padding: 20,
     justifyContent: "center",

@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { Avatar, Text, Button } from "react-native-paper";
+import { Avatar, Text, IconButton } from "react-native-paper";
 import { useAuth } from "../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import { useTheme } from "../context/ThemeContext";
+import Button from "../components/Button";
 
 export default function Profile() {
   const { user, logout } = useAuth();
   const [image, setImage] = useState(null);
   const router = useRouter();
+  const { theme, isDarkTheme, toggleTheme } = useTheme();
 
   useEffect(() => {
     loadProfileImage();
@@ -51,30 +54,50 @@ export default function Profile() {
   };
 
   return (
-    <View style={styles.container}>
-      <Avatar.Image
-        size={120}
-        source={
-          image ? { uri: image } : require("../assets/default-avatar.png")
-        }
-        style={styles.avatar}
-      />
-
-      <Button mode="text" onPress={pickImage} style={styles.changePhotoButton}>
-        Alterar foto
-      </Button>
-
-      <View style={styles.infoContainer}>
-        <Text style={styles.email}>{user?.email}</Text>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <View style={styles.themeButtonContainer}>
+        <IconButton
+          icon={isDarkTheme ? "white-balance-sunny" : "moon-waning-crescent"}
+          size={24}
+          onPress={toggleTheme}
+          iconColor={theme.colors.text}
+          style={styles.themeButton}
+        />
       </View>
 
-      <Button
-        mode="contained"
-        onPress={handleLogout}
-        style={styles.logoutButton}
-      >
-        Sair
-      </Button>
+      <View style={styles.content}>
+        <Avatar.Image
+          size={120}
+          source={
+            image ? { uri: image } : require("../assets/default-avatar.png")
+          }
+          style={styles.avatar}
+        />
+
+        <Button
+          mode="text"
+          onPress={pickImage}
+          style={styles.changePhotoButton}
+        >
+          Alterar foto
+        </Button>
+
+        <View style={styles.infoContainer}>
+          <Text style={[styles.email, { color: theme.colors.text }]}>
+            {user?.email}
+          </Text>
+        </View>
+
+        <Button
+          mode="contained"
+          onPress={handleLogout}
+          style={styles.logoutButton}
+        >
+          Sair
+        </Button>
+      </View>
     </View>
   );
 }
@@ -82,9 +105,19 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  themeButtonContainer: {
+    position: "absolute",
+    right: 20,
+    zIndex: 1,
+  },
+  themeButton: {
+    margin: 0,
+  },
+  content: {
+    flex: 1,
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
   },
   avatar: {
     marginTop: 50,

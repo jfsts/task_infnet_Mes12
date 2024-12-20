@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Text, SegmentedButtons } from "react-native-paper";
+import { Text, SegmentedButtons, FAB, IconButton } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [filter, setFilter] = useState("pending");
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { theme } = useTheme();
+  const { theme, isDarkTheme, toggleTheme } = useTheme();
   const { tasks, addTask, toggleTask, deleteTask } = useTasks();
 
   const userName = user?.email.split("@")[0];
@@ -33,6 +33,10 @@ export default function Dashboard() {
     router.replace("/");
   };
 
+  const handleProfile = () => {
+    router.push("/profile");
+  };
+
   const filteredTasks = tasks.filter((task) =>
     filter === "completed" ? task.completed : !task.completed
   );
@@ -41,6 +45,15 @@ export default function Dashboard() {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
+      <View style={styles.themeButtonContainer}>
+        <IconButton
+          icon={isDarkTheme ? "white-balance-sunny" : "moon-waning-crescent"}
+          size={24}
+          onPress={toggleTheme}
+          iconColor={theme.colors.text}
+        />
+      </View>
+
       <View style={styles.header}>
         <Text style={[styles.welcome, { color: theme.colors.text }]}>
           Olá, {userName}
@@ -49,6 +62,7 @@ export default function Dashboard() {
           Sair
         </Button>
       </View>
+
       <Text style={[styles.title, { color: theme.colors.text }]}>Tarefas</Text>
       <View style={styles.inputContainer}>
         <Input
@@ -79,6 +93,13 @@ export default function Dashboard() {
         style={styles.list}
         contentContainerStyle={styles.listContent}
       />
+
+      <FAB
+        icon="account"
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        onPress={handleProfile}
+        color={theme.colors.surface}
+      />
     </View>
   );
 }
@@ -88,11 +109,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  themeButtonContainer: {
+    position: "absolute",
+    right: 20,
+    zIndex: 1,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
+    marginTop: 50,
   },
   welcome: {
     fontSize: 20,
@@ -115,5 +142,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
     textAlign: "center",
+  },
+  fab: {
+    position: "absolute",
+    margin: 16,
+    right: 0,
+    bottom: 0,
   },
 });
