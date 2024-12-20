@@ -11,20 +11,19 @@ import {
 } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
-// Configuração do Firebase
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAHg5AhA4zQfRmIbXyTBwSg0mhAgCvhGI4",
-  authDomain: "tasks-login-firebase-infnet.firebaseapp.com",
-  projectId: "tasks-login-firebase-infnet",
-  storageBucket: "tasks-login-firebase-infnet.firebasestorage.app",
-  messagingSenderId: "850325712145",
-  appId: "1:850325712145:web:e393ee3e77b72d106bb0b0"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID
 };
 
-// Inicializa o Firebase apenas se não houver uma instância existente
+
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Inicializa a autenticação com persistência
 let auth;
 try {
   auth = getAuth(app);
@@ -41,7 +40,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verifica se há usuário salvo no AsyncStorage ao iniciar
+
     const loadUser = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('@user');
@@ -57,7 +56,7 @@ export function AuthProvider({ children }) {
 
     loadUser();
 
-    // Listener para mudanças no estado de autenticação
+
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
         const userData = {
@@ -123,7 +122,7 @@ export function AuthProvider({ children }) {
   };
 
   if (loading) {
-    return null; // ou um componente de loading
+    return null; 
   }
 
   return (
