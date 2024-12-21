@@ -1,0 +1,11 @@
+{
+  "ignoreWarnings": [
+    "@types/react-native",
+    "@expo/metro-config",
+    "@expo/metro-runtime",
+    "@firebase/auth",
+    "dotenv",
+    "firebase"
+  ],
+  "checkPackageVersions": false
+} 
