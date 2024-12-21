@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
@@ -9,38 +10,50 @@ import {
   signOut,
   getReactNativePersistence
 } from 'firebase/auth';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
 };
-
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-let auth;
-try {
-  auth = getAuth(app);
-} catch (error) {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-  });
-}
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
 
 const AuthContext = createContext({});
+
+const getFirebaseErrorMessage = (errorCode) => {
+  switch (errorCode) {
+    case 'auth/invalid-email':
+      return 'Email inválido';
+    case 'auth/user-disabled':
+      return 'Usuário desativado';
+    case 'auth/user-not-found':
+      return 'Usuário não encontrado';
+    case 'auth/wrong-password':
+      return 'Senha incorreta';
+    case 'auth/email-already-in-use':
+      return 'Este email já está em uso';
+    case 'auth/operation-not-allowed':
+      return 'Operação não permitida';
+    case 'auth/weak-password':
+      return 'A senha é muito fraca';
+    default:
+      return 'Ocorreu um erro na autenticação';
+  }
+};
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     const loadUser = async () => {
       try {
         const savedUser = await AsyncStorage.getItem('@user');
@@ -48,14 +61,13 @@ export function AuthProvider({ children }) {
           setUser(JSON.parse(savedUser));
         }
       } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
+        console.log('Erro ao carregar usuário:', error);
       } finally {
         setLoading(false);
       }
     };
 
     loadUser();
-
 
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
@@ -84,10 +96,16 @@ export function AuthProvider({ children }) {
       };
       await AsyncStorage.setItem('@user', JSON.stringify(userData));
       setUser(userData);
-      return true;
+      return { success: true };
     } catch (error) {
-      console.error('Erro no login:', error);
-      return false;
+      console.log('Erro no login:', error);
+      const errorMessage = getFirebaseErrorMessage(error.code);
+      Alert.alert(
+        'Erro no Login',
+        errorMessage,
+        [{ text: 'OK' }]
+      );
+      return { success: false };
     }
   };
 
@@ -122,7 +140,7 @@ export function AuthProvider({ children }) {
   };
 
   if (loading) {
-    return null; 
+    return null;
   }
 
   return (

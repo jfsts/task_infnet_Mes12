@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import { useState, useRef } from "react";
+import { View, StyleSheet, FlatList, Alert, Animated } from "react-native";
 import { Text, SegmentedButtons, FAB, IconButton } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
@@ -12,6 +12,7 @@ import TaskCard from "../components/TaskCard";
 export default function Dashboard() {
   const [newTask, setNewTask] = useState("");
   const [filter, setFilter] = useState("pending");
+  const buttonColorAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
   const { user, logout } = useAuth();
   const { theme, isDarkTheme, toggleTheme } = useTheme();
@@ -19,12 +20,43 @@ export default function Dashboard() {
 
   const userName = user?.email.split("@")[0];
 
+  const animateButton = () => {
+    // Anima para verde
+    Animated.timing(buttonColorAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => {
+      // Volta para a cor original
+      setTimeout(() => {
+        Animated.timing(buttonColorAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      }, 500); // Aguarda meio segundo antes de voltar
+    });
+  };
+
   const handleAddTask = async () => {
-    if (newTask.trim()) {
-      const success = await addTask(newTask.trim());
-      if (success) {
-        setNewTask("");
-      }
+    const taskText = newTask.trim();
+
+    if (!taskText) {
+      Alert.alert("Erro", "Por favor, insira uma tarefa.", [{ text: "OK" }]);
+      return;
+    }
+
+    if (taskText.length < 3) {
+      Alert.alert("Erro", "A tarefa deve ter pelo menos 3 caracteres.", [
+        { text: "OK" },
+      ]);
+      return;
+    }
+
+    const success = await addTask(taskText);
+    if (success) {
+      animateButton(); // Inicia a animação
+      setNewTask("");
     }
   };
 
@@ -40,6 +72,11 @@ export default function Dashboard() {
   const filteredTasks = tasks.filter((task) =>
     filter === "completed" ? task.completed : !task.completed
   );
+
+  const buttonBackgroundColor = buttonColorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [theme.colors.primary, "#4CAF50"],
+  });
 
   return (
     <View
@@ -70,6 +107,13 @@ export default function Dashboard() {
           value={newTask}
           onChangeText={setNewTask}
           style={{ flex: 1, marginRight: 10 }}
+          onSubmitEditing={handleAddTask}
+          error={newTask.trim().length > 0 && newTask.trim().length < 3}
+          helperText={
+            newTask.trim().length > 0 && newTask.trim().length < 3
+              ? "Mínimo de 3 caracteres"
+              : ""
+          }
         />
         <Button onPress={handleAddTask}>Adicionar</Button>
       </View>

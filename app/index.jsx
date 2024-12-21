@@ -16,15 +16,9 @@ export default function Login() {
   const { theme, isDarkTheme, toggleTheme } = useTheme();
 
   const handleLogin = async () => {
-    try {
-      const success = await login(email, password);
-      if (success) {
-        router.replace("/dashboard");
-      } else {
-        setError("Credenciais inválidas");
-      }
-    } catch (error) {
-      setError("Erro ao fazer login");
+    const result = await login(email, password);
+    if (result.success) {
+      router.replace("/dashboard");
     }
   };
 
