@@ -69,7 +69,7 @@ export function TaskProvider({ children }) {
     }
   };
 
-  // Processa as tasks de forma segura
+
   const tasks = (data?.tasks || []).map(task => ({
     id: String(task.id),
     title: task.description || '',
