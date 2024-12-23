@@ -124,6 +124,11 @@ export default function TaskCard({ task, onToggle, onDelete }) {
     animateOut(() => onToggle(task.id));
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("pt-BR");
+  };
+
   return (
     <Animated.View
       style={[
@@ -172,7 +177,7 @@ export default function TaskCard({ task, onToggle, onDelete }) {
                   {task.title}
                 </Text>
                 <Text style={[styles.date, { color: theme.colors.text }]}>
-                  {new Date(task.createdAt).toLocaleDateString()}
+                  {formatDate(task.date)}
                 </Text>
               </View>
               <View style={styles.actions}>

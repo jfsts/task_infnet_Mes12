@@ -5,6 +5,8 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 import { TaskProvider } from "../context/TaskContext";
+import { ApolloProvider } from "@apollo/client";
+import client from "../apollo";
 
 function StackNavigator() {
   const { theme, isDarkTheme } = useTheme();
@@ -57,16 +59,18 @@ function StackNavigator() {
 
 export default function Layout() {
   return (
-    <ThemeProvider>
-      <PaperProvider>
-        <SafeAreaProvider>
-          <AuthProvider>
-            <TaskProvider>
-              <StackNavigator />
-            </TaskProvider>
-          </AuthProvider>
-        </SafeAreaProvider>
-      </PaperProvider>
-    </ThemeProvider>
+    <ApolloProvider client={client}>
+      <ThemeProvider>
+        <PaperProvider>
+          <SafeAreaProvider>
+            <AuthProvider>
+              <TaskProvider>
+                <StackNavigator />
+              </TaskProvider>
+            </AuthProvider>
+          </SafeAreaProvider>
+        </PaperProvider>
+      </ThemeProvider>
+    </ApolloProvider>
   );
 }
